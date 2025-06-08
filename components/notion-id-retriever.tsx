@@ -1,67 +1,71 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Copy, Check, CheckCircle, XCircle } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Copy, Check, CheckCircle, XCircle } from "lucide-react";
+import Header from "./header";
+import Illustration from "./illustration";
+import Footer from "./footer";
 
 export default function NotionIdRetriever() {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   // Dynamic field count based on screen size
   const getFieldCount = () => {
-    if (isMobile) return 1
-    if (isTablet) return 3
-    return 5
-  }
+    if (isMobile) return 1;
+    if (isTablet) return 3;
+    return 5;
+  };
 
-  const fieldCount = getFieldCount()
-  const [urls, setUrls] = useState<string[]>(Array(fieldCount).fill(""))
-  const [ids, setIds] = useState<string[]>(Array(fieldCount).fill(""))
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
-  const [validationStates, setValidationStates] = useState<("valid" | "invalid" | "empty")[]>(
-    Array(fieldCount).fill("empty"),
-  )
+  const fieldCount = getFieldCount();
+  const [urls, setUrls] = useState<string[]>(Array(fieldCount).fill(""));
+  const [ids, setIds] = useState<string[]>(Array(fieldCount).fill(""));
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [validationStates, setValidationStates] = useState<
+    ("valid" | "invalid" | "empty")[]
+  >(Array(fieldCount).fill("empty"));
 
   // Handle responsive breakpoints
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth
-      setIsMobile(width < 768)
-      setIsTablet(width >= 768 && width < 1024)
-    }
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
 
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Reset arrays when field count changes
   useEffect(() => {
-    const newFieldCount = getFieldCount()
+    const newFieldCount = getFieldCount();
     setUrls((prev) => {
-      const newUrls = Array(newFieldCount).fill("")
-      return newUrls.map((_, i) => prev[i] || "")
-    })
+      const newUrls = Array(newFieldCount).fill("");
+      return newUrls.map((_, i) => prev[i] || "");
+    });
     setIds((prev) => {
-      const newIds = Array(newFieldCount).fill("")
-      return newIds.map((_, i) => prev[i] || "")
-    })
+      const newIds = Array(newFieldCount).fill("");
+      return newIds.map((_, i) => prev[i] || "");
+    });
     setValidationStates((prev) => {
-      const newStates = Array(newFieldCount).fill("empty")
-      return newStates.map((_, i) => prev[i] || "empty")
-    })
-  }, [isMobile, isTablet])
+      const newStates = Array(newFieldCount).fill("empty");
+      return newStates.map((_, i) => prev[i] || "empty");
+    });
+  }, [isMobile, isTablet]);
 
+  // Validate Notion URL
   const validateNotionUrl = (url: string): "valid" | "invalid" | "empty" => {
-    if (!url.trim()) return "empty"
+    if (!url.trim()) return "empty";
 
     try {
-      new URL(url)
+      new URL(url);
     } catch {
-      return "invalid"
+      return "invalid";
     }
 
     const notionPatterns = [
@@ -73,104 +77,116 @@ export default function NotionIdRetriever() {
       /^https:\/\/notion\.so\/[a-f0-9]{32}/i,
       /^https:\/\/notion\.so\/[^/]+\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i,
       /^https:\/\/notion\.so\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i,
-    ]
+    ];
 
-    return notionPatterns.some((pattern) => pattern.test(url)) ? "valid" : "invalid"
-  }
+    return notionPatterns.some((pattern) => pattern.test(url))
+      ? "valid"
+      : "invalid";
+  };
 
+  // Extract Notion ID
   const extractNotionId = (url: string): string => {
-    if (!url) return ""
+    if (!url) return "";
 
-    const cleanUrl = url.split("?")[0].split("#")[0]
+    const cleanUrl = url.split("?")[0].split("#")[0];
 
     const patterns = [
       /notion\.so\/[^/]+\/[^/]+-([a-f0-9]{32})/i,
       /notion\.so\/([a-f0-9]{32})/i,
       /notion\.so\/[^/]+\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
       /notion\.so\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
-    ]
+    ];
 
     for (const pattern of patterns) {
-      const match = cleanUrl.match(pattern)
+      const match = cleanUrl.match(pattern);
       if (match) {
-        return match[1].replace(/-/g, "")
+        return match[1].replace(/-/g, "");
       }
     }
 
-    return ""
-  }
+    return "";
+  };
 
   const handleUrlChange = (index: number, value: string) => {
-    const newUrls = [...urls]
-    newUrls[index] = value
-    setUrls(newUrls)
+    const newUrls = [...urls];
+    newUrls[index] = value;
+    setUrls(newUrls);
 
     // Validate URL and show alert for invalid URLs
-    const validationState = validateNotionUrl(value)
-    const newValidationStates = [...validationStates]
-    newValidationStates[index] = validationState
-    setValidationStates(newValidationStates)
+    const validationState = validateNotionUrl(value);
+    const newValidationStates = [...validationStates];
+    newValidationStates[index] = validationState;
+    setValidationStates(newValidationStates);
 
     // Show browser alert for invalid URLs
     if (value.trim() && validationState === "invalid") {
       alert(
-        "Invalid Notion URL! Please enter a valid Notion database URL that starts with https://www.notion.so/ or https://notion.so/ and contains a valid database ID.",
-      )
+        "Invalid Notion URL! Please enter a valid Notion database URL that starts with https://www.notion.so/ or https://notion.so/ and contains a valid database ID."
+      );
     }
 
     // Auto-extract ID when URL is valid
-    const extractedId = validationState === "valid" ? extractNotionId(value) : ""
-    const newIds = [...ids]
-    newIds[index] = extractedId
-    setIds(newIds)
-  }
+    const extractedId =
+      validationState === "valid" ? extractNotionId(value) : "";
+    const newIds = [...ids];
+    newIds[index] = extractedId;
+    setIds(newIds);
+  };
 
   const handleContinue = () => {
-    const newIds = urls.map((url) => extractNotionId(url))
-    setIds(newIds)
-  }
+    const newIds = urls.map((url) => extractNotionId(url));
+    setIds(newIds);
+  };
 
   const copyToClipboard = async (text: string, index: number) => {
-    if (!text) return
+    if (!text) return;
 
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedIndex(index)
-      setTimeout(() => setCopiedIndex(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err)
+      console.error("Failed to copy text: ", err);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
-              <img src="/assets/notion-icon.svg" alt="Notion Logo" className="w-full h-full" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Notion-id Retriever</h1>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6 md:py-12">
-        <div className={`${isMobile || isTablet ? "space-y-8" : "grid md:grid-cols-2 gap-8"}`}>
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-12">
+        <div
+          className={` ${
+            isMobile || isTablet ? "space-y-8" : "grid md:grid-cols-2 gap-8"
+          }`}
+        >
           {/* Step 1 */}
           <Card className="bg-gray-100">
             <CardContent className="p-4 md:p-8">
               <div className="text-center mb-6 md:mb-8">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Step1</h2>
-                <p className="text-sm md:text-base text-gray-600">Enter URL of your database in Notion</p>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                  Step1
+                </h2>
+                <p className="text-base md:text-base text-gray-600">
+                  Enter URL of your database in Notion
+                </p>
               </div>
 
               <div className="space-y-3 md:space-y-4">
                 {urls.map((url, index) => (
-                  <div key={index} className={`${isMobile ? "space-y-2" : "flex items-center gap-3"}`}>
-                    <label className={`text-sm font-medium text-gray-700 ${isMobile ? "block" : "w-20 shrink-0"}`}>
+                  <div
+                    key={index}
+                    className={`${
+                      isMobile ? "space-y-2" : "flex items-center gap-3"
+                    }`}
+                  >
+                    <label
+                      className={`text-sm font-medium text-gray-700 ${
+                        isMobile ? "block" : "w-20 shrink-0"
+                      }`}
+                    >
                       Notion URL
                     </label>
                     <div className="flex-1 relative">
@@ -183,8 +199,8 @@ export default function NotionIdRetriever() {
                           validationStates[index] === "valid"
                             ? "border-green-500 focus:border-green-500 focus:ring-green-500"
                             : validationStates[index] === "invalid"
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                              : "border-gray-300"
+                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                            : "border-gray-300"
                         }`}
                       />
                       {validationStates[index] !== "empty" && (
@@ -211,19 +227,31 @@ export default function NotionIdRetriever() {
               </div>
             </CardContent>
           </Card>
-
           {/* Step 2 */}
           <Card>
             <CardContent className="p-4 md:p-8">
               <div className="text-center mb-6 md:mb-8">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Step2</h2>
-                <p className="text-sm md:text-base text-gray-600">Get your notion database</p>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                  Step2
+                </h2>
+                <p className="text-base md:text-base text-gray-600">
+                  Get your notion database id
+                </p>
               </div>
 
               <div className="space-y-3 md:space-y-4">
                 {ids.map((id, index) => (
-                  <div key={index} className={`${isMobile ? "space-y-2" : "flex items-center gap-3"}`}>
-                    <label className={`text-sm font-medium text-gray-700 ${isMobile ? "block" : "w-20 shrink-0"}`}>
+                  <div
+                    key={index}
+                    className={`${
+                      isMobile ? "space-y-2" : "flex items-center gap-3"
+                    }`}
+                  >
+                    <label
+                      className={`text-sm font-medium text-gray-700 ${
+                        isMobile ? "block" : "w-20 shrink-0"
+                      }`}
+                    >
                       Notion ID {index + 1}
                     </label>
                     <div className="flex-1 relative">
@@ -255,7 +283,7 @@ export default function NotionIdRetriever() {
 
               <div className="flex justify-center mt-6 md:mt-8">
                 <Button
-                  className="bg-green-700 hover:bg-green-800 text-white px-6 md:px-8 text-sm md:text-base"
+                  className="bg-green-700 hover:bg-green-800 text-white px-6 md:px-8 text-sm md:text-base cursor-default"
                   disabled={!ids.some((id) => id)}
                 >
                   That's done!
@@ -266,17 +294,9 @@ export default function NotionIdRetriever() {
         </div>
 
         {/* Illustration */}
-        <div className="mt-12 md:mt-16 text-center">
-          <div className="w-full max-w-sm md:max-w-md mx-auto">
-            <img
-              src="/assets/illustration.png"
-              alt="People working with computers illustration"
-              className="w-full h-auto"
-            />
-          </div>
-          <p className="text-xs md:text-sm text-gray-500 mt-4">Copyright by Johnny-boy of @GOODA</p>
-        </div>
-      </div>
+        {isMobile || <Illustration />}
+        <Footer />
+      </main>
     </div>
-  )
+  );
 }
