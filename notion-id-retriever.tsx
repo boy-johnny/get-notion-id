@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Copy, Check, CheckCircle, XCircle, AlertCircle } from "lucide-react"
+import { Copy, Check, CheckCircle, XCircle } from "lucide-react"
 
 export default function NotionIdRetriever() {
   const [isMobile, setIsMobile] = useState(false)
@@ -105,11 +105,20 @@ export default function NotionIdRetriever() {
     newUrls[index] = value
     setUrls(newUrls)
 
+    // Validate URL and show alert for invalid URLs
     const validationState = validateNotionUrl(value)
     const newValidationStates = [...validationStates]
     newValidationStates[index] = validationState
     setValidationStates(newValidationStates)
 
+    // Show browser alert for invalid URLs
+    if (value.trim() && validationState === "invalid") {
+      alert(
+        "Invalid Notion URL! Please enter a valid Notion database URL that starts with https://www.notion.so/ or https://notion.so/ and contains a valid database ID.",
+      )
+    }
+
+    // Auto-extract ID when URL is valid
     const extractedId = validationState === "valid" ? extractNotionId(value) : ""
     const newIds = [...ids]
     newIds[index] = extractedId
@@ -139,8 +148,8 @@ export default function NotionIdRetriever() {
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-black rounded flex items-center justify-center">
-              <span className="text-white font-bold text-base md:text-lg">N</span>
+            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+              <img src="/assets/notion-icon.svg" alt="Notion Logo" className="w-full h-full" />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-900">Notion-id Retriever</h1>
           </div>
@@ -191,37 +200,6 @@ export default function NotionIdRetriever() {
                   </div>
                 ))}
               </div>
-
-              {!isMobile && (
-                <div className="mt-6 p-4 bg-white rounded-lg border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertCircle className="h-5 w-5 text-blue-500" />
-                    <span className="font-medium text-gray-900">URL Validation Status</span>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-green-700">
-                        Valid URLs: {validationStates.filter((state) => state === "valid").length}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <XCircle className="h-4 w-4 text-red-500" />
-                      <span className="text-red-700">
-                        Invalid URLs: {validationStates.filter((state) => state === "invalid").length}
-                      </span>
-                    </div>
-                  </div>
-                  {validationStates.some((state) => state === "invalid") && (
-                    <div className="mt-3 p-3 bg-red-50 rounded border border-red-200">
-                      <p className="text-sm text-red-700">
-                        <strong>Tip:</strong> Make sure your URLs start with https://www.notion.so/ or
-                        https://notion.so/ and contain a valid database ID.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
 
               <div className="flex justify-center mt-6 md:mt-8">
                 <Button
@@ -291,7 +269,7 @@ export default function NotionIdRetriever() {
         <div className="mt-12 md:mt-16 text-center">
           <div className="w-full max-w-sm md:max-w-md mx-auto">
             <img
-              src="/placeholder.svg?height=200&width=400"
+              src="/assets/illustration.png"
               alt="People working with computers illustration"
               className="w-full h-auto"
             />
