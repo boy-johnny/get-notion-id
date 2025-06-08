@@ -1,4 +1,6 @@
-# Notion ID Retriever
+# Get Notion Database ID
+
+![screenshot](./public/screenshot.png)
 
 A simple web application that helps you extract database IDs from Notion URLs. This tool makes it easy to get the clean database ID needed for API integrations and other development purposes.
 
@@ -43,4 +45,9 @@ This project is built with:
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
+   ```
+
+NOTICE!
+`NPM v7+` is strict about dependency versions. If a package requires a specific version range and you have a conflicting version, npm will throw an error instead of installing potentially incompatible versions. You can use `npm install --legacy-peer-deps` or `npm install -force` to install deps.
+
